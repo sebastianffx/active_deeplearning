@@ -85,3 +85,48 @@ def create_train_val_test_files(name_train, name_val, name_test):
     f.close()
     g.close()
     h.close()
+
+
+def generate_protos(gendir_path, hyper_params):
+    solverPrototxt='/home/jsotaloram/active_learning/exp_birds/solver_s_birds.prototxt'
+    deployPrototxt='/home/jsotaloram/active_learning/exp_birds/train_birds_small.prototxt'
+
+    lines_solver = []
+    save_protos_path = '/home/jsotaloram/active_learning/exp_birds/protos/'
+    lines_proto = []
+    f = open(deployPrototxt,'r')
+    for line in f:
+        lines_proto.append(line)
+    
+    [line_p for line_p in lines_proto[0:10]]
+    f = open(solverPrototxt,'r')
+    for line in f:
+        lines_solver.append(line)
+
+    for (lr_i,wd_i) in hyper_params:
+        print 'generating prototxt for LR: ' + str(lr_i) + ' and WD: ' + str(wd_i)
+        temp_proto = open(gendir_path+'proto_lr'+str(lr_i)+'_wd'+str(wd_i)+'_birds.prototxt','w')
+        temp_proto.writelines([line_p for line_p in lines_proto[0:40]])
+        temp_proto.write('    lr_mult: '+str(lr_i)+'\n')
+        temp_proto.write('    decay_mult: '+str(wd_i)+'\n')
+        temp_proto.writelines([line_p for line_p in lines_proto[42:44]])
+        temp_proto.write('    lr_mult: '+str(lr_i)+'\n')
+        temp_proto.write('    decay_mult: '+str(wd_i)+'\n')
+        temp_proto.writelines([line_p for line_p in lines_proto[46:69]])
+        temp_proto.write('    lr_mult: '+str(lr_i)+'\n')
+        temp_proto.write('    decay_mult: '+str(wd_i)+'\n')
+        temp_proto.writelines([line_p for line_p in lines_proto[71:73]])
+        temp_proto.write('    lr_mult: '+str(lr_i)+'\n')
+        temp_proto.write('    decay_mult: '+str(wd_i)+'\n')
+        temp_proto.writelines([line_p for line_p in lines_proto[75:len(lines_proto)]])
+
+
+def generate_hyperparams_comb():
+    learning_rates_pool = [0.0001,0.0003, 0.001,0.005,0.01,0.1,0.5,0.8,1,2,4]
+    decay_mult_pool = [0.0001,0.001,0.005, 0.01,0.1,0.5, 1,5,2,10,100]
+    hyper_params_combs = []
+    for lr_item in learning_rates_pool:
+        for dec_item in decay_mult_pool:
+        #print 'combination of lr: ' + str(lr_item) +' and decay: ' +str(dec_item) + '\n'
+            hyper_params_combs.append((lr_item,dec_item))
+    return hyper_params_combs
